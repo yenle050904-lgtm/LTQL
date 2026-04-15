@@ -119,19 +119,7 @@ namespace QuanLyBanHang.Forms.Systems
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Đăng Nhập — Quản Lý Bán Nước Giải Khát";
 
-            // Căn giữa card khi form load
-            this.Resize += (s, e) =>
-            {
-                pnlCard.Location = new Point(
-                    (this.ClientSize.Width - pnlCard.Width) / 2,
-                    (this.ClientSize.Height - pnlCard.Height) / 2
-                );
-            };
-            pnlCard.Location = new Point(
-                (this.ClientSize.Width - pnlCard.Width) / 2,
-                (this.ClientSize.Height - pnlCard.Height) / 2
-            );
-
+        
             this.ResumeLayout(false);
         }
 

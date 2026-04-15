@@ -12,50 +12,93 @@ namespace QuanLyBanHang.Forms.Categories
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.errorProvider = new ErrorProvider(this.components);
-            this.dgvLoaiSP = new DataGridView();
-            this.txtTenLoai = new TextBox();
-            this.lblTen = new Label();
-            this.btnThem = new Button();
-            this.btnSua = new Button();
-            this.btnXoa = new Button();
-
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLoaiSP)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
-            this.SuspendLayout();
-
-            this.dgvLoaiSP.Location = new Point(16, 16);
-            this.dgvLoaiSP.Size = new Size(500, 250);
-            this.dgvLoaiSP.CellClick += new DataGridViewCellEventHandler(this.dgvLoaiSP_CellClick);
-
-            this.lblTen.Text = "Tên loại:"; this.lblTen.Font = UIHelper.FontSmall;
-            this.lblTen.Location = new Point(16, 290); this.lblTen.AutoSize = true;
-            this.txtTenLoai.Location = new Point(90, 287); this.txtTenLoai.Size = new Size(250, 26);
-            UIHelper.StyleTextBox(this.txtTenLoai);
-
-            int btnY = 330;
-            this.btnThem.Text = "✚ Thêm"; this.btnThem.Location = new Point(16, btnY);
-            this.btnThem.Size = new Size(100, 36); UIHelper.StyleButtonPrimary(this.btnThem);
-            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
-
-            this.btnSua.Text = "✏ Sửa"; this.btnSua.Location = new Point(126, btnY);
-            this.btnSua.Size = new Size(100, 36); UIHelper.StyleButtonSuccess(this.btnSua);
-            this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
-
-            this.btnXoa.Text = "🗑 Xóa"; this.btnXoa.Location = new Point(236, btnY);
-            this.btnXoa.Size = new Size(100, 36); UIHelper.StyleButtonDanger(this.btnXoa);
-            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
-
-            this.ClientSize = new Size(540, 390);
-            this.Controls.Add(dgvLoaiSP); this.Controls.Add(lblTen); this.Controls.Add(txtTenLoai);
-            this.Controls.Add(btnThem); this.Controls.Add(btnSua); this.Controls.Add(btnXoa);
-            this.BackColor = UIHelper.ContentBg;
-            this.Name = "frmLoaiSanPham"; this.Text = "Quản Lý Loại Sản Phẩm";
-            this.Load += new System.EventHandler(this.frmLoaiSanPham_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLoaiSP)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.ResumeLayout(false); this.PerformLayout();
+            components = new System.ComponentModel.Container();
+            errorProvider = new ErrorProvider(components);
+            dgvLoaiSP = new DataGridView();
+            txtTenLoai = new TextBox();
+            lblTen = new Label();
+            btnThem = new Button();
+            btnSua = new Button();
+            btnXoa = new Button();
+            ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvLoaiSP).BeginInit();
+            SuspendLayout();
+            // 
+            // errorProvider
+            // 
+            errorProvider.ContainerControl = this;
+            // 
+            // dgvLoaiSP
+            // 
+            dgvLoaiSP.ColumnHeadersHeight = 29;
+            dgvLoaiSP.Location = new Point(16, 16);
+            dgvLoaiSP.Name = "dgvLoaiSP";
+            dgvLoaiSP.RowHeadersWidth = 51;
+            dgvLoaiSP.Size = new Size(500, 250);
+            dgvLoaiSP.TabIndex = 0;
+            dgvLoaiSP.CellClick += dgvLoaiSP_CellClick;
+            // 
+            // txtTenLoai
+            // 
+            txtTenLoai.Location = new Point(90, 287);
+            txtTenLoai.Name = "txtTenLoai";
+            txtTenLoai.Size = new Size(250, 27);
+            txtTenLoai.TabIndex = 2;
+            // 
+            // lblTen
+            // 
+            lblTen.AutoSize = true;
+            lblTen.Font = new Font("Segoe UI", 9F);
+            lblTen.Location = new Point(16, 290);
+            lblTen.Name = "lblTen";
+            lblTen.Size = new Size(64, 20);
+            lblTen.TabIndex = 1;
+            lblTen.Text = "Tên loại:";
+            // 
+            // btnThem
+            // 
+            btnThem.Location = new Point(16, 330);
+            btnThem.Name = "btnThem";
+            btnThem.Size = new Size(100, 36);
+            btnThem.TabIndex = 3;
+            btnThem.Text = "✚ Thêm";
+            btnThem.Click += btnThem_Click;
+            // 
+            // btnSua
+            // 
+            btnSua.Location = new Point(126, 330);
+            btnSua.Name = "btnSua";
+            btnSua.Size = new Size(100, 36);
+            btnSua.TabIndex = 4;
+            btnSua.Text = "✏ Sửa";
+            btnSua.Click += btnSua_Click;
+            // 
+            // btnXoa
+            // 
+            btnXoa.Location = new Point(236, 330);
+            btnXoa.Name = "btnXoa";
+            btnXoa.Size = new Size(100, 36);
+            btnXoa.TabIndex = 5;
+            btnXoa.Text = "🗑 Xóa";
+            btnXoa.Click += btnXoa_Click;
+            // 
+            // frmLoaiSanPham
+            // 
+            BackColor = Color.FromArgb(245, 245, 245);
+            ClientSize = new Size(540, 390);
+            Controls.Add(dgvLoaiSP);
+            Controls.Add(lblTen);
+            Controls.Add(txtTenLoai);
+            Controls.Add(btnThem);
+            Controls.Add(btnSua);
+            Controls.Add(btnXoa);
+            Name = "frmLoaiSanPham";
+            Text = "Quản Lý Loại Sản Phẩm";
+            Load += frmLoaiSanPham_Load;
+            ((System.ComponentModel.ISupportInitialize)errorProvider).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvLoaiSP).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private ErrorProvider errorProvider;

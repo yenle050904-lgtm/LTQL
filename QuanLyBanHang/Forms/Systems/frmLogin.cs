@@ -16,6 +16,22 @@ namespace QuanLyBanHang.Forms.Systems
         public frmLogin()
         {
             InitializeComponent();
+
+            // Căn giữa card khi form load
+            this.Resize += (s, e) =>
+            {
+                pnlCard.Location = new Point(
+                    (this.ClientSize.Width - pnlCard.Width) / 2,
+                    (this.ClientSize.Height - pnlCard.Height) / 2
+                );
+            };
+            pnlCard.Location = new Point(
+                (this.ClientSize.Width - pnlCard.Width) / 2,
+                (this.ClientSize.Height - pnlCard.Height) / 2
+            );
+
+            
+        
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -23,6 +39,15 @@ namespace QuanLyBanHang.Forms.Systems
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text;
 
+
+            // 1. Khởi tạo form Main
+            frmMain formMain = new frmMain();
+
+            // 2. Hiển thị form Main
+            formMain.Show();
+
+            // 3. Ẩn form Login đi
+            this.Hide();
             // Validation cơ bản
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {

@@ -12,90 +12,170 @@ namespace QuanLyBanHang.Forms.Categories
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.errorProvider = new ErrorProvider(this.components);
-            this.dgvKhachHang = new DataGridView();
-            this.txtTimKiem = new TextBox();
-            this.txtHoTen = new TextBox();
-            this.txtDienThoai = new TextBox();
-            this.txtDiaChi = new TextBox();
-            this.btnThem = new Button();
-            this.btnSua = new Button();
-            this.btnXoa = new Button();
-            this.btnLamMoi = new Button();
-            this.lblSearch = new Label();
-            this.lblHoTen = new Label();
-            this.lblDT = new Label();
-            this.lblDC = new Label();
-
-            ((System.ComponentModel.ISupportInitialize)(this.dgvKhachHang)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
-            this.SuspendLayout();
-
-            // Search
-            this.lblSearch.Text = "🔍 Tìm kiếm:"; this.lblSearch.Font = UIHelper.FontRegular;
-            this.lblSearch.Location = new Point(16, 16); this.lblSearch.AutoSize = true;
-            this.txtTimKiem.Location = new Point(110, 14); this.txtTimKiem.Size = new Size(300, 26);
-            this.txtTimKiem.PlaceholderText = "Nhập tên, SĐT hoặc địa chỉ...";
-            UIHelper.StyleTextBox(this.txtTimKiem);
-            this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
-
-            // Grid
-            this.dgvKhachHang.Location = new Point(16, 50);
-            this.dgvKhachHang.Size = new Size(700, 250);
-            this.dgvKhachHang.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            this.dgvKhachHang.CellClick += new DataGridViewCellEventHandler(this.dgvKhachHang_CellClick);
-
-            // Inputs
-            int y1 = 320, y2 = 360;
-            this.lblHoTen.Text = "Họ tên:"; this.lblHoTen.Font = UIHelper.FontSmall;
-            this.lblHoTen.Location = new Point(16, y1 + 3); this.lblHoTen.AutoSize = true;
-            this.txtHoTen.Location = new Point(90, y1); this.txtHoTen.Size = new Size(200, 26);
-            UIHelper.StyleTextBox(this.txtHoTen);
-
-            this.lblDT.Text = "SĐT:"; this.lblDT.Font = UIHelper.FontSmall;
-            this.lblDT.Location = new Point(310, y1 + 3); this.lblDT.AutoSize = true;
-            this.txtDienThoai.Location = new Point(360, y1); this.txtDienThoai.Size = new Size(150, 26);
-            UIHelper.StyleTextBox(this.txtDienThoai);
-
-            this.lblDC.Text = "Địa chỉ:"; this.lblDC.Font = UIHelper.FontSmall;
-            this.lblDC.Location = new Point(16, y2 + 3); this.lblDC.AutoSize = true;
-            this.txtDiaChi.Location = new Point(90, y2); this.txtDiaChi.Size = new Size(420, 26);
-            UIHelper.StyleTextBox(this.txtDiaChi);
-
-            // Buttons
-            int btnY = 405;
-            this.btnThem.Text = "✚ Thêm"; this.btnThem.Location = new Point(16, btnY);
-            this.btnThem.Size = new Size(110, 36); UIHelper.StyleButtonPrimary(this.btnThem);
-            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
-
-            this.btnSua.Text = "✏ Sửa"; this.btnSua.Location = new Point(136, btnY);
-            this.btnSua.Size = new Size(110, 36); UIHelper.StyleButtonSuccess(this.btnSua);
-            this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
-
-            this.btnXoa.Text = "🗑 Xóa"; this.btnXoa.Location = new Point(256, btnY);
-            this.btnXoa.Size = new Size(110, 36); UIHelper.StyleButtonDanger(this.btnXoa);
-            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
-
-            this.btnLamMoi.Text = "↻ Làm mới"; this.btnLamMoi.Location = new Point(376, btnY);
-            this.btnLamMoi.Size = new Size(110, 36); UIHelper.StyleButtonSecondary(this.btnLamMoi);
-            this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
-
-            // Form
-            this.ClientSize = new Size(740, 465);
-            this.Controls.Add(lblSearch); this.Controls.Add(txtTimKiem);
-            this.Controls.Add(dgvKhachHang);
-            this.Controls.Add(lblHoTen); this.Controls.Add(txtHoTen);
-            this.Controls.Add(lblDT); this.Controls.Add(txtDienThoai);
-            this.Controls.Add(lblDC); this.Controls.Add(txtDiaChi);
-            this.Controls.Add(btnThem); this.Controls.Add(btnSua);
-            this.Controls.Add(btnXoa); this.Controls.Add(btnLamMoi);
-            this.BackColor = UIHelper.ContentBg;
-            this.Name = "frmKhachHang"; this.Text = "Quản Lý Khách Hàng";
-            this.Load += new System.EventHandler(this.frmKhachHang_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvKhachHang)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.ResumeLayout(false); this.PerformLayout();
+            components = new System.ComponentModel.Container();
+            errorProvider = new ErrorProvider(components);
+            dgvKhachHang = new DataGridView();
+            txtTimKiem = new TextBox();
+            txtHoTen = new TextBox();
+            txtDienThoai = new TextBox();
+            txtDiaChi = new TextBox();
+            btnThem = new Button();
+            btnSua = new Button();
+            btnXoa = new Button();
+            btnLamMoi = new Button();
+            lblSearch = new Label();
+            lblHoTen = new Label();
+            lblDT = new Label();
+            lblDC = new Label();
+            ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvKhachHang).BeginInit();
+            SuspendLayout();
+            // 
+            // errorProvider
+            // 
+            errorProvider.ContainerControl = this;
+            // 
+            // dgvKhachHang
+            // 
+            dgvKhachHang.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            dgvKhachHang.ColumnHeadersHeight = 29;
+            dgvKhachHang.Location = new Point(16, 50);
+            dgvKhachHang.Name = "dgvKhachHang";
+            dgvKhachHang.RowHeadersWidth = 51;
+            dgvKhachHang.Size = new Size(700, 250);
+            dgvKhachHang.TabIndex = 2;
+            dgvKhachHang.CellClick += dgvKhachHang_CellClick;
+            // 
+            // txtTimKiem
+            // 
+            txtTimKiem.Location = new Point(110, 14);
+            txtTimKiem.Name = "txtTimKiem";
+            txtTimKiem.PlaceholderText = "Nhập tên, SĐT hoặc địa chỉ...";
+            txtTimKiem.Size = new Size(300, 27);
+            txtTimKiem.TabIndex = 1;
+            txtTimKiem.TextChanged += txtTimKiem_TextChanged;
+            // 
+            // txtHoTen
+            // 
+            txtHoTen.Location = new Point(90, 320);
+            txtHoTen.Name = "txtHoTen";
+            txtHoTen.Size = new Size(200, 27);
+            txtHoTen.TabIndex = 4;
+            // 
+            // txtDienThoai
+            // 
+            txtDienThoai.Location = new Point(360, 320);
+            txtDienThoai.Name = "txtDienThoai";
+            txtDienThoai.Size = new Size(150, 27);
+            txtDienThoai.TabIndex = 6;
+            // 
+            // txtDiaChi
+            // 
+            txtDiaChi.Location = new Point(90, 360);
+            txtDiaChi.Name = "txtDiaChi";
+            txtDiaChi.Size = new Size(420, 27);
+            txtDiaChi.TabIndex = 8;
+            // 
+            // btnThem
+            // 
+            btnThem.Location = new Point(16, 405);
+            btnThem.Name = "btnThem";
+            btnThem.Size = new Size(110, 36);
+            btnThem.TabIndex = 9;
+            btnThem.Text = "✚ Thêm";
+            btnThem.Click += btnThem_Click;
+            // 
+            // btnSua
+            // 
+            btnSua.Location = new Point(136, 405);
+            btnSua.Name = "btnSua";
+            btnSua.Size = new Size(110, 36);
+            btnSua.TabIndex = 10;
+            btnSua.Text = "✏ Sửa";
+            btnSua.Click += btnSua_Click;
+            // 
+            // btnXoa
+            // 
+            btnXoa.Location = new Point(256, 405);
+            btnXoa.Name = "btnXoa";
+            btnXoa.Size = new Size(110, 36);
+            btnXoa.TabIndex = 11;
+            btnXoa.Text = "🗑 Xóa";
+            btnXoa.Click += btnXoa_Click;
+            // 
+            // btnLamMoi
+            // 
+            btnLamMoi.Location = new Point(376, 405);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new Size(110, 36);
+            btnLamMoi.TabIndex = 12;
+            btnLamMoi.Text = "↻ Làm mới";
+            btnLamMoi.Click += btnLamMoi_Click;
+            // 
+            // lblSearch
+            // 
+            lblSearch.AutoSize = true;
+            lblSearch.Font = new Font("Segoe UI", 10F);
+            lblSearch.Location = new Point(16, 16);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new Size(111, 23);
+            lblSearch.TabIndex = 0;
+            lblSearch.Text = "🔍 Tìm kiếm:";
+            // 
+            // lblHoTen
+            // 
+            lblHoTen.AutoSize = true;
+            lblHoTen.Font = new Font("Segoe UI", 9F);
+            lblHoTen.Location = new Point(16, 320);
+            lblHoTen.Name = "lblHoTen";
+            lblHoTen.Size = new Size(57, 20);
+            lblHoTen.TabIndex = 3;
+            lblHoTen.Text = "Họ tên:";
+            // 
+            // lblDT
+            // 
+            lblDT.AutoSize = true;
+            lblDT.Font = new Font("Segoe UI", 9F);
+            lblDT.Location = new Point(310, 320);
+            lblDT.Name = "lblDT";
+            lblDT.Size = new Size(39, 20);
+            lblDT.TabIndex = 5;
+            lblDT.Text = "SĐT:";
+            // 
+            // lblDC
+            // 
+            lblDC.AutoSize = true;
+            lblDC.Font = new Font("Segoe UI", 9F);
+            lblDC.Location = new Point(16, 360);
+            lblDC.Name = "lblDC";
+            lblDC.Size = new Size(58, 20);
+            lblDC.TabIndex = 7;
+            lblDC.Text = "Địa chỉ:";
+            // 
+            // frmKhachHang
+            // 
+            BackColor = Color.FromArgb(245, 245, 245);
+            ClientSize = new Size(740, 465);
+            Controls.Add(lblSearch);
+            Controls.Add(txtTimKiem);
+            Controls.Add(dgvKhachHang);
+            Controls.Add(lblHoTen);
+            Controls.Add(txtHoTen);
+            Controls.Add(lblDT);
+            Controls.Add(txtDienThoai);
+            Controls.Add(lblDC);
+            Controls.Add(txtDiaChi);
+            Controls.Add(btnThem);
+            Controls.Add(btnSua);
+            Controls.Add(btnXoa);
+            Controls.Add(btnLamMoi);
+            Name = "frmKhachHang";
+            Text = "Quản Lý Khách Hàng";
+            Load += frmKhachHang_Load;
+            ((System.ComponentModel.ISupportInitialize)errorProvider).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvKhachHang).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private ErrorProvider errorProvider;
