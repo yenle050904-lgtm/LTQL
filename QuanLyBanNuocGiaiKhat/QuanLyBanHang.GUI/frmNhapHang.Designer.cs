@@ -28,7 +28,7 @@ namespace QuanLyBanHang.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cboNCC = new System.Windows.Forms.ComboBox();
             this.txtGhiChu = new System.Windows.Forms.TextBox();
@@ -54,6 +54,8 @@ namespace QuanLyBanHang.GUI
             this.btnHuyPhieu = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.dgvChiTietNhap = new System.Windows.Forms.DataGridView();
+            this.chkCoHSD = new System.Windows.Forms.CheckBox();
+            this.dtpHanSuDung = new System.Windows.Forms.DateTimePicker();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudSoLuongNhap)).BeginInit();
@@ -158,6 +160,8 @@ namespace QuanLyBanHang.GUI
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.AliceBlue;
+            this.groupBox2.Controls.Add(this.dtpHanSuDung);
+            this.groupBox2.Controls.Add(this.chkCoHSD);
             this.groupBox2.Controls.Add(this.btnThemVaoPhieu);
             this.groupBox2.Controls.Add(this.txtThanhTienSP);
             this.groupBox2.Controls.Add(this.lblSoLuongNhap);
@@ -182,7 +186,7 @@ namespace QuanLyBanHang.GUI
             this.btnThemVaoPhieu.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnThemVaoPhieu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnThemVaoPhieu.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnThemVaoPhieu.Location = new System.Drawing.Point(306, 124);
+            this.btnThemVaoPhieu.Location = new System.Drawing.Point(552, 124);
             this.btnThemVaoPhieu.Name = "btnThemVaoPhieu";
             this.btnThemVaoPhieu.Size = new System.Drawing.Size(177, 34);
             this.btnThemVaoPhieu.TabIndex = 0;
@@ -193,17 +197,17 @@ namespace QuanLyBanHang.GUI
             // txtThanhTienSP
             // 
             this.txtThanhTienSP.BackColor = System.Drawing.Color.SteelBlue;
-            this.txtThanhTienSP.Location = new System.Drawing.Point(552, 84);
+            this.txtThanhTienSP.Location = new System.Drawing.Point(502, 79);
             this.txtThanhTienSP.Name = "txtThanhTienSP";
             this.txtThanhTienSP.ReadOnly = true;
-            this.txtThanhTienSP.Size = new System.Drawing.Size(236, 25);
+            this.txtThanhTienSP.Size = new System.Drawing.Size(248, 25);
             this.txtThanhTienSP.TabIndex = 8;
             // 
             // lblSoLuongNhap
             // 
             this.lblSoLuongNhap.AutoSize = true;
             this.lblSoLuongNhap.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSoLuongNhap.Location = new System.Drawing.Point(434, 28);
+            this.lblSoLuongNhap.Location = new System.Drawing.Point(29, 131);
             this.lblSoLuongNhap.Name = "lblSoLuongNhap";
             this.lblSoLuongNhap.Size = new System.Drawing.Size(113, 20);
             this.lblSoLuongNhap.TabIndex = 0;
@@ -213,7 +217,7 @@ namespace QuanLyBanHang.GUI
             // 
             this.lblSanPham.AutoSize = true;
             this.lblSanPham.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSanPham.Location = new System.Drawing.Point(12, 30);
+            this.lblSanPham.Location = new System.Drawing.Point(29, 30);
             this.lblSanPham.Name = "lblSanPham";
             this.lblSanPham.Size = new System.Drawing.Size(81, 20);
             this.lblSanPham.TabIndex = 0;
@@ -223,7 +227,7 @@ namespace QuanLyBanHang.GUI
             // 
             this.lblGiaNhap.AutoSize = true;
             this.lblGiaNhap.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblGiaNhap.Location = new System.Drawing.Point(18, 92);
+            this.lblGiaNhap.Location = new System.Drawing.Point(51, 84);
             this.lblGiaNhap.Name = "lblGiaNhap";
             this.lblGiaNhap.Size = new System.Drawing.Size(74, 20);
             this.lblGiaNhap.TabIndex = 0;
@@ -233,7 +237,7 @@ namespace QuanLyBanHang.GUI
             // 
             this.lblThanhTien.AutoSize = true;
             this.lblThanhTien.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblThanhTien.Location = new System.Drawing.Point(446, 92);
+            this.lblThanhTien.Location = new System.Drawing.Point(414, 84);
             this.lblThanhTien.Name = "lblThanhTien";
             this.lblThanhTien.Size = new System.Drawing.Size(86, 20);
             this.lblThanhTien.TabIndex = 0;
@@ -241,14 +245,14 @@ namespace QuanLyBanHang.GUI
             // 
             // nudSoLuongNhap
             // 
-            this.nudSoLuongNhap.Location = new System.Drawing.Point(552, 25);
+            this.nudSoLuongNhap.Location = new System.Drawing.Point(162, 124);
             this.nudSoLuongNhap.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.nudSoLuongNhap.Name = "nudSoLuongNhap";
-            this.nudSoLuongNhap.Size = new System.Drawing.Size(236, 25);
+            this.nudSoLuongNhap.Size = new System.Drawing.Size(204, 25);
             this.nudSoLuongNhap.TabIndex = 7;
             this.nudSoLuongNhap.Value = new decimal(new int[] {
             1,
@@ -258,17 +262,17 @@ namespace QuanLyBanHang.GUI
             // 
             // txtGiaNhap
             // 
-            this.txtGiaNhap.Location = new System.Drawing.Point(100, 84);
+            this.txtGiaNhap.Location = new System.Drawing.Point(162, 79);
             this.txtGiaNhap.Name = "txtGiaNhap";
-            this.txtGiaNhap.Size = new System.Drawing.Size(266, 25);
+            this.txtGiaNhap.Size = new System.Drawing.Size(204, 25);
             this.txtGiaNhap.TabIndex = 6;
             // 
             // cboChonSP
             // 
             this.cboChonSP.FormattingEnabled = true;
-            this.cboChonSP.Location = new System.Drawing.Point(100, 25);
+            this.cboChonSP.Location = new System.Drawing.Point(162, 24);
             this.cboChonSP.Name = "cboChonSP";
-            this.cboChonSP.Size = new System.Drawing.Size(266, 25);
+            this.cboChonSP.Size = new System.Drawing.Size(204, 25);
             this.cboChonSP.TabIndex = 5;
             // 
             // groupBox3
@@ -339,14 +343,14 @@ namespace QuanLyBanHang.GUI
             // dgvChiTietNhap
             // 
             this.dgvChiTietNhap.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.LightSkyBlue;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI Semibold", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvChiTietNhap.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.LightSkyBlue;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI Semibold", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvChiTietNhap.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dgvChiTietNhap.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvChiTietNhap.Dock = System.Windows.Forms.DockStyle.Top;
             this.dgvChiTietNhap.Location = new System.Drawing.Point(3, 21);
@@ -355,6 +359,28 @@ namespace QuanLyBanHang.GUI
             this.dgvChiTietNhap.RowTemplate.Height = 24;
             this.dgvChiTietNhap.Size = new System.Drawing.Size(789, 166);
             this.dgvChiTietNhap.TabIndex = 0;
+            // 
+            // chkCoHSD
+            // 
+            this.chkCoHSD.AutoSize = true;
+            this.chkCoHSD.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkCoHSD.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkCoHSD.Location = new System.Drawing.Point(404, 26);
+            this.chkCoHSD.Name = "chkCoHSD";
+            this.chkCoHSD.Size = new System.Drawing.Size(79, 24);
+            this.chkCoHSD.TabIndex = 9;
+            this.chkCoHSD.Text = "Có HSD";
+            this.chkCoHSD.UseVisualStyleBackColor = true;
+            this.chkCoHSD.CheckedChanged += new System.EventHandler(this.chkCoHSD_CheckedChanged);
+            // 
+            // dtpHanSuDung
+            // 
+            this.dtpHanSuDung.Enabled = false;
+            this.dtpHanSuDung.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpHanSuDung.Location = new System.Drawing.Point(502, 22);
+            this.dtpHanSuDung.Name = "dtpHanSuDung";
+            this.dtpHanSuDung.Size = new System.Drawing.Size(248, 25);
+            this.dtpHanSuDung.TabIndex = 10;
             // 
             // frmNhapHang
             // 
@@ -410,5 +436,7 @@ namespace QuanLyBanHang.GUI
         private System.Windows.Forms.Button btnLuuPhieu;
         private System.Windows.Forms.Button btnHuyPhieu;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DateTimePicker dtpHanSuDung;
+        private System.Windows.Forms.CheckBox chkCoHSD;
     }
 }

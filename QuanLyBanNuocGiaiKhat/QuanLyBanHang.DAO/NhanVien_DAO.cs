@@ -9,87 +9,123 @@ namespace QuanLyBanHang.DAO
         // 1. Lấy danh sách
         public DataTable LayDanhSach()
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = "SELECT ID AS [Mã NV], HoVaTen AS [Họ và Tên], DienThoai AS [Điện thoại], TenDangNhap AS [Tên đăng nhập], MatKhau AS [Mật khẩu], QuyenHan AS [Admin] FROM NhanViens";
-            DataTable dt = DataProvider.TruyVanLayDuLieu(sql, conn);
-            DataProvider.DongKetNoi(conn);
-            return dt;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = @"SELECT ID AS [Mã NV], HoVaTen AS [Họ và Tên], DienThoai AS [Điện thoại], 
+                                      TenDangNhap AS [Tên đăng nhập], MatKhau AS [Mật khẩu], QuyenHan AS [Admin] 
+                               FROM NhanViens";
+                return DataProvider.TruyVanLayDuLieu(sql, conn);
+            }
         }
 
         // 2. Thêm nhân viên
         public bool Them(NhanVien_DTO nv)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"INSERT INTO NhanViens (HoVaTen, DienThoai, TenDangNhap, MatKhau, QuyenHan) VALUES (N'{nv.HoVaTen}', '{nv.DienThoai}', '{nv.TenDangNhap}', '{nv.MatKhau}', {nv.QuyenHan})";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            int rows = cmd.ExecuteNonQuery();
-            DataProvider.DongKetNoi(conn);
-            return rows > 0;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = @"INSERT INTO NhanViens (HoVaTen, DienThoai, TenDangNhap, MatKhau, QuyenHan) 
+                               VALUES (@HoVaTen, @DienThoai, @TenDangNhap, @MatKhau, @QuyenHan)";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@HoVaTen", (object)nv.HoVaTen ?? System.DBNull.Value),
+                    new SqlParameter("@DienThoai", (object)nv.DienThoai ?? System.DBNull.Value),
+                    new SqlParameter("@TenDangNhap", (object)nv.TenDangNhap ?? System.DBNull.Value),
+                    new SqlParameter("@MatKhau", (object)nv.MatKhau ?? System.DBNull.Value),
+                    new SqlParameter("@QuyenHan", nv.QuyenHan));
+                return kq > 0;
+            }
         }
 
         // 3. Sửa nhân viên
         public bool Sua(NhanVien_DTO nv)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"UPDATE NhanViens SET HoVaTen = N'{nv.HoVaTen}', DienThoai = '{nv.DienThoai}', TenDangNhap = '{nv.TenDangNhap}', MatKhau = '{nv.MatKhau}', QuyenHan = {nv.QuyenHan} WHERE ID = {nv.ID}";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            int rows = cmd.ExecuteNonQuery();
-            DataProvider.DongKetNoi(conn);
-            return rows > 0;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = @"UPDATE NhanViens 
+                               SET HoVaTen = @HoVaTen, DienThoai = @DienThoai, TenDangNhap = @TenDangNhap, 
+                                   MatKhau = @MatKhau, QuyenHan = @QuyenHan 
+                               WHERE ID = @ID";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@HoVaTen", (object)nv.HoVaTen ?? System.DBNull.Value),
+                    new SqlParameter("@DienThoai", (object)nv.DienThoai ?? System.DBNull.Value),
+                    new SqlParameter("@TenDangNhap", (object)nv.TenDangNhap ?? System.DBNull.Value),
+                    new SqlParameter("@MatKhau", (object)nv.MatKhau ?? System.DBNull.Value),
+                    new SqlParameter("@QuyenHan", nv.QuyenHan),
+                    new SqlParameter("@ID", nv.ID));
+                return kq > 0;
+            }
         }
 
         // 4. Xóa nhân viên
-        public void Xoa(int id)
+        public bool Xoa(int id)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"DELETE FROM NhanViens WHERE ID = {id}";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
-            DataProvider.DongKetNoi(conn);
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "DELETE FROM NhanViens WHERE ID = @ID";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@ID", id));
+                return kq > 0;
+            }
         }
 
         // 5. Tìm kiếm
         public DataTable TimKiem(string tuKhoa)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"SELECT ID AS [Mã NV], HoVaTen AS [Họ và Tên], DienThoai AS [Điện thoại], TenDangNhap AS [Tên đăng nhập], MatKhau AS [Mật khẩu], QuyenHan AS [Admin] FROM NhanViens WHERE HoVaTen LIKE N'{tuKhoa}%' OR TenDangNhap LIKE '{tuKhoa}%'";
-            DataTable dt = DataProvider.TruyVanLayDuLieu(sql, conn);
-            DataProvider.DongKetNoi(conn);
-            return dt;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = @"SELECT ID AS [Mã NV], HoVaTen AS [Họ và Tên], DienThoai AS [Điện thoại], 
+                                      TenDangNhap AS [Tên đăng nhập], MatKhau AS [Mật khẩu], QuyenHan AS [Admin] 
+                               FROM NhanViens 
+                               WHERE HoVaTen LIKE N'%' + @TuKhoa + N'%' OR TenDangNhap LIKE '%' + @TuKhoa + '%'";
+                return DataProvider.TruyVanLayDuLieu(sql, conn,
+                    new SqlParameter("@TuKhoa", tuKhoa ?? string.Empty));
+            }
         }
+
+        // 6. Kiểm tra đăng nhập
         public DataTable KiemTraDangNhap(string tenDangNhap, string matKhau)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = "SELECT * FROM NhanViens WHERE TenDangNhap = @TenDangNhap AND MatKhau = @MatKhau";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@TenDangNhap", tenDangNhap);
-            cmd.Parameters.AddWithValue("@MatKhau", matKhau);
-
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
-            DataTable dt = new DataTable();
-            da.Fill(dt);
-            DataProvider.DongKetNoi(conn);
-            return dt;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "SELECT * FROM NhanViens WHERE TenDangNhap = @TenDangNhap AND MatKhau = @MatKhau";
+                return DataProvider.TruyVanLayDuLieu(sql, conn,
+                    new SqlParameter("@TenDangNhap", tenDangNhap ?? string.Empty),
+                    new SqlParameter("@MatKhau", matKhau ?? string.Empty));
+            }
         }
 
+        // 7. Đổi mật khẩu
         public bool DoiMatKhau(string tenDangNhap, string matKhauCu, string matKhauMoi)
         {
-            // Xác minh mật khẩu cũ đúng không
+            // Xác minh mật khẩu cũ
             DataTable dt = KiemTraDangNhap(tenDangNhap, matKhauCu);
+            if (dt == null || dt.Rows.Count == 0)
+                return false;
 
-            if (dt != null && dt.Rows.Count > 0)
+            using (SqlConnection conn = DataProvider.MoKetNoi())
             {
-                // Lưu mật khẩu mới dạng plain text
                 string sql = "UPDATE NhanViens SET MatKhau = @MatKhauMoi WHERE TenDangNhap = @TenDangNhap";
-                SqlConnection conn = DataProvider.MoKetNoi();
-                SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@MatKhauMoi", matKhauMoi);
-                cmd.Parameters.AddWithValue("@TenDangNhap", tenDangNhap);
-                int kq = cmd.ExecuteNonQuery();
-                DataProvider.DongKetNoi(conn);
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@MatKhauMoi", matKhauMoi ?? string.Empty),
+                    new SqlParameter("@TenDangNhap", tenDangNhap ?? string.Empty));
                 return kq > 0;
             }
-            return false;
+        }
+
+        // 8. Kiểm tra tên đăng nhập đã tồn tại chưa (phục vụ cho thêm mới)
+        public bool KiemTraTonTaiTenDangNhap(string tenDangNhap, int idBoQua = 0)
+        {
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                // idBoQua > 0 dùng khi sửa: bỏ qua chính bản ghi đang sửa
+                string sql = "SELECT COUNT(*) FROM NhanViens WHERE TenDangNhap = @TenDangNhap AND ID <> @ID";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TenDangNhap", tenDangNhap ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@ID", idBoQua);
+                    int count = System.Convert.ToInt32(cmd.ExecuteScalar());
+                    return count > 0;
+                }
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
-using QuanLyBanHang.DTO; // Gọi DTO để xài
+using QuanLyBanHang.DTO;
 
 namespace QuanLyBanHang.DAO
 {
@@ -9,55 +9,76 @@ namespace QuanLyBanHang.DAO
         // 1. Lấy danh sách
         public DataTable LayDanhSach()
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = "SELECT ID, HoTen AS [Họ Tên], SoDienThoai AS [Số ĐT], DiaChi AS [Địa chỉ] FROM KhachHangs";
-            DataTable dt = DataProvider.TruyVanLayDuLieu(sql, conn);
-            DataProvider.DongKetNoi(conn);
-            return dt;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "SELECT ID, HoTen AS [Họ Tên], SoDienThoai AS [Số ĐT], DiaChi AS [Địa chỉ] FROM KhachHangs";
+                return DataProvider.TruyVanLayDuLieu(sql, conn);
+            }
         }
 
-        // 2. Thêm khách hàng
+        // 2. Thêm khách hàng (dùng SqlParameter để chống SQL Injection)
         public bool Them(KhachHang_DTO kh)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"INSERT INTO KhachHangs (HoTen, SoDienThoai, DiaChi) VALUES (N'{kh.HoTen}', '{kh.SoDienThoai}', N'{kh.DiaChi}')";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            int rows = cmd.ExecuteNonQuery();
-            DataProvider.DongKetNoi(conn);
-            return rows > 0;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "INSERT INTO KhachHangs (HoTen, SoDienThoai, DiaChi) VALUES (@HoTen, @SDT, @DiaChi)";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@HoTen", (object)kh.HoTen ?? System.DBNull.Value),
+                    new SqlParameter("@SDT", (object)kh.SoDienThoai ?? System.DBNull.Value),
+                    new SqlParameter("@DiaChi", (object)kh.DiaChi ?? System.DBNull.Value));
+                return kq > 0;
+            }
         }
 
         // 3. Sửa khách hàng
         public bool Sua(KhachHang_DTO kh)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = $"UPDATE KhachHangs SET HoTen = N'{kh.HoTen}', SoDienThoai = '{kh.SoDienThoai}', DiaChi = N'{kh.DiaChi}' WHERE ID = {kh.ID}";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            int rows = cmd.ExecuteNonQuery();
-            DataProvider.DongKetNoi(conn);
-            return rows > 0;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "UPDATE KhachHangs SET HoTen = @HoTen, SoDienThoai = @SDT, DiaChi = @DiaChi WHERE ID = @ID";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@HoTen", (object)kh.HoTen ?? System.DBNull.Value),
+                    new SqlParameter("@SDT", (object)kh.SoDienThoai ?? System.DBNull.Value),
+                    new SqlParameter("@DiaChi", (object)kh.DiaChi ?? System.DBNull.Value),
+                    new SqlParameter("@ID", kh.ID));
+                return kq > 0;
+            }
         }
 
         // 4. Xóa khách hàng
         public bool Xoa(int id)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = "DELETE FROM KhachHangs WHERE ID = " + id;
-            bool ketQua = DataProvider.TruyVanKhongLayDuLieu(sql, conn);
-            DataProvider.DongKetNoi(conn);
-            return ketQua;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = "DELETE FROM KhachHangs WHERE ID = @ID";
+                int kq = DataProvider.TruyVanKhongLayDuLieu(sql, conn,
+                    new SqlParameter("@ID", id));
+                return kq > 0;
+            }
         }
 
-        // 5. Tìm kiếm
+        // 5. Tìm kiếm (match cả prefix lẫn giữa chuỗi)
         public DataTable TimKiem(string tuKhoa)
         {
-            SqlConnection conn = DataProvider.MoKetNoi();
-            string sql = string.Format(
-                "SELECT ID, HoTen AS [Họ Tên], SoDienThoai AS [Số ĐT], DiaChi AS [Địa chỉ] FROM KhachHangs WHERE HoTen LIKE N'{0}%' OR SoDienThoai LIKE '%{0}%'",
-                tuKhoa);
-            DataTable dt = DataProvider.TruyVanLayDuLieu(sql, conn);
-            DataProvider.DongKetNoi(conn);
-            return dt;
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                string sql = @"SELECT ID, HoTen AS [Họ Tên], SoDienThoai AS [Số ĐT], DiaChi AS [Địa chỉ] 
+                               FROM KhachHangs 
+                               WHERE HoTen LIKE N'%' + @TuKhoa + N'%' OR SoDienThoai LIKE '%' + @TuKhoa + '%'";
+                return DataProvider.TruyVanLayDuLieu(sql, conn,
+                    new SqlParameter("@TuKhoa", tuKhoa ?? string.Empty));
+            }
+        }
+
+        // 6. Lấy theo ID (phục vụ BanHang combo)
+        public DataTable LayDanhSachChoComboBox()
+        {
+            using (SqlConnection conn = DataProvider.MoKetNoi())
+            {
+                // Trả về tên cột không dấu để bind cho chắc chắn
+                string sql = "SELECT ID, HoTen FROM KhachHangs ORDER BY ID";
+                return DataProvider.TruyVanLayDuLieu(sql, conn);
+            }
         }
     }
 }

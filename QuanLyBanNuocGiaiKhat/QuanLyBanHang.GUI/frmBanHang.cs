@@ -1,24 +1,27 @@
+using QuanLyBanHang.BUS;
+using QuanLyBanHang.DTO;
 using System;
 using System.Data;
-using System.Linq;
+using System.Drawing;
 using System.Windows.Forms;
-using QuanLyBanHang.BUS;
 
 namespace QuanLyBanHang.GUI
 {
     public partial class frmBanHang : Form
     {
-        // Sử dụng đúng tên class: BanHang_BUS (không phải BanHangBUS)
         private BanHang_BUS banHangBus = new BanHang_BUS();
-
-        // Giỏ hàng dùng DataTable (không dùng class SanPham/HoaDon_ChiTiet vì không tồn tại trong project)
+        private KhuyenMai_BUS kmBus = new KhuyenMai_BUS();
         private DataTable _gioHang;
 
-        // Lưu thông tin sản phẩm đang chọn
+        // Sản phẩm đang chọn
         private int _maSPChon = -1;
         private string _tenSPChon = "";
         private int _soLuongTonChon = 0;
         private decimal _donGiaChon = 0;
+
+        // Khuyến mãi đang áp dụng
+        private KhuyenMai_DTO _kmApDung = null;
+        private decimal _tienGiam = 0;
 
         public frmBanHang()
         {
@@ -27,7 +30,6 @@ namespace QuanLyBanHang.GUI
 
         private void frmBanHang_Load(object sender, EventArgs e)
         {
-            // Khởi tạo giỏ hàng DataTable
             _gioHang = new DataTable();
             _gioHang.Columns.Add("MaSP", typeof(int));
             _gioHang.Columns.Add("TenSP", typeof(string));
@@ -41,9 +43,6 @@ namespace QuanLyBanHang.GUI
             LoadKhachHang();
         }
 
-        // ==========================================
-        // 1. CÁC HÀM TẢI DỮ LIỆU TỪ BUS
-        // ==========================================
         private void LoadDanhSachSanPham()
         {
             try
@@ -61,7 +60,7 @@ namespace QuanLyBanHang.GUI
             try
             {
                 cboKhachHang.DataSource = banHangBus.LayDanhSachKhachHang();
-                cboKhachHang.DisplayMember = "Họ Tên"; // Đúng với alias trong SQL: HoTen AS [Họ Tên]
+                cboKhachHang.DisplayMember = "HoTen";
                 cboKhachHang.ValueMember = "ID";
             }
             catch (Exception ex)
@@ -70,35 +69,49 @@ namespace QuanLyBanHang.GUI
             }
         }
 
-        // Hàm tính lại Tổng cộng từ DataTable giỏ hàng
+        // Tính tổng cộng: hiển thị cả tổng trước giảm, tiền giảm, và tổng sau giảm
         private void CapNhatTongCong()
         {
-            decimal tongTien = 0;
+            decimal tongGoc = 0;
             foreach (DataRow row in _gioHang.Rows)
             {
-                tongTien += Convert.ToDecimal(row["ThanhTien"]);
+                tongGoc += Convert.ToDecimal(row["ThanhTien"]);
             }
-            txtTongCong.Text = tongTien.ToString("N0") + " VNĐ";
+
+            // Nếu đã có KM áp dụng, tính lại tiền giảm theo tổng mới
+            if (_kmApDung != null)
+            {
+                _tienGiam = kmBus.TinhTienGiam(_kmApDung, tongGoc);
+
+                // Nếu tổng đơn giờ không còn đủ điều kiện tối thiểu -> hủy áp dụng
+                if (tongGoc < _kmApDung.DonToiThieu)
+                {
+                    HuyKhuyenMai();
+                    _tienGiam = 0;
+                }
+            }
+
+            decimal tongSauGiam = tongGoc - _tienGiam;
+            if (tongSauGiam < 0) tongSauGiam = 0;
+
+            txtTongCong.Text = tongSauGiam.ToString("N0") + " VNĐ";
+
+            // Các textbox hiển thị thêm (nếu Designer có)
+            if (txtTamTinh != null) txtTamTinh.Text = tongGoc.ToString("N0") + " VNĐ";
+            if (txtTienGiam != null) txtTienGiam.Text = _tienGiam.ToString("N0") + " VNĐ";
         }
 
-        // ==========================================
-        // 2. XỬ LÝ SỰ KIỆN CHỌN SẢN PHẨM
-        // ==========================================
         private void dgvSanPham_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvSanPham.Rows[e.RowIndex];
-                _maSPChon = Convert.ToInt32(row.Cells[0].Value);      // Mã SP
-                _tenSPChon = row.Cells[1].Value.ToString();            // Tên SP
-                _soLuongTonChon = Convert.ToInt32(row.Cells[2].Value); // Tồn kho
-                _donGiaChon = Convert.ToDecimal(row.Cells[3].Value);   // Đơn giá
-            }
+            if (e.RowIndex < 0) return;
+
+            DataGridViewRow row = dgvSanPham.Rows[e.RowIndex];
+            _maSPChon = Convert.ToInt32(row.Cells[0].Value);
+            _tenSPChon = row.Cells[1].Value.ToString();
+            _soLuongTonChon = Convert.ToInt32(row.Cells[2].Value);
+            _donGiaChon = Convert.ToDecimal(row.Cells[3].Value);
         }
 
-        // ==========================================
-        // 3. CÁC NÚT THÊM, XÓA, THANH TOÁN
-        // ==========================================
         private void btnThemVaoHoaDon_Click(object sender, EventArgs e)
         {
             if (_maSPChon == -1)
@@ -114,7 +127,6 @@ namespace QuanLyBanHang.GUI
                 return;
             }
 
-            // Kiểm tra xem sản phẩm đã có trong giỏ chưa
             DataRow monDaCo = null;
             foreach (DataRow row in _gioHang.Rows)
             {
@@ -127,7 +139,6 @@ namespace QuanLyBanHang.GUI
 
             if (monDaCo != null)
             {
-                // Cộng dồn số lượng
                 int slMoi = Convert.ToInt32(monDaCo["SoLuong"]) + soLuongMua;
                 if (slMoi > _soLuongTonChon)
                 {
@@ -162,8 +173,76 @@ namespace QuanLyBanHang.GUI
         private void btnXoaTatCa_Click(object sender, EventArgs e)
         {
             _gioHang.Rows.Clear();
+            HuyKhuyenMai();
             CapNhatTongCong();
         }
+
+        // =============== KHUYẾN MÃI ===============
+
+        private void btnApDungKM_Click(object sender, EventArgs e)
+        {
+            if (_gioHang.Rows.Count == 0)
+            {
+                MessageBox.Show("Giỏ hàng trống, không thể áp dụng khuyến mãi!",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string maCode = txtMaKM.Text.Trim().ToUpper();
+            if (string.IsNullOrEmpty(maCode))
+            {
+                MessageBox.Show("Vui lòng nhập mã khuyến mãi!");
+                return;
+            }
+
+            // Tính tổng gốc
+            decimal tongGoc = 0;
+            foreach (DataRow row in _gioHang.Rows)
+                tongGoc += Convert.ToDecimal(row["ThanhTien"]);
+
+            try
+            {
+                KhuyenMai_DTO km = kmBus.KiemTraApDung(maCode, tongGoc);
+                if (km == null)
+                {
+                    MessageBox.Show("Mã khuyến mãi không hợp lệ!\n\nCó thể do:\n- Mã không tồn tại\n- Mã đã bị tạm dừng\n- Đã hết hạn\n- Đơn hàng chưa đủ giá trị tối thiểu",
+                        "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    HuyKhuyenMai();
+                    return;
+                }
+
+                _kmApDung = km;
+                _tienGiam = kmBus.TinhTienGiam(km, tongGoc);
+
+                if (lblKMApDung != null)
+                    lblKMApDung.Text = $"✓ {km.TenKhuyenMai} (-{_tienGiam:N0} VNĐ)";
+
+                CapNhatTongCong();
+
+                MessageBox.Show($"Áp dụng mã '{km.MaCode}' thành công!\nGiảm {_tienGiam:N0} VNĐ",
+                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kiểm tra mã KM: " + ex.Message);
+            }
+        }
+
+        private void btnHuyKM_Click(object sender, EventArgs e)
+        {
+            HuyKhuyenMai();
+            CapNhatTongCong();
+        }
+
+        private void HuyKhuyenMai()
+        {
+            _kmApDung = null;
+            _tienGiam = 0;
+            if (txtMaKM != null) txtMaKM.Clear();
+            if (lblKMApDung != null) lblKMApDung.Text = "(Chưa áp dụng)";
+        }
+
+        // =============== THANH TOÁN ===============
 
         private void btnThanhToan_Click(object sender, EventArgs e)
         {
@@ -173,29 +252,48 @@ namespace QuanLyBanHang.GUI
                 return;
             }
 
-            // Lấy ID Khách hàng từ ComboBox
-            int maKhachHang = (cboKhachHang.SelectedValue != null) ? Convert.ToInt32(cboKhachHang.SelectedValue) : 0;
-
-            // Nhân viên đang đăng nhập
+            int maKhachHang = (cboKhachHang.SelectedValue != null)
+                ? Convert.ToInt32(cboKhachHang.SelectedValue)
+                : 0;
             int maNhanVien = UserSession.ID;
 
-
-            // Tính tổng tiền
-            decimal tongTien = 0;
+            decimal tongGoc = 0;
             foreach (DataRow row in _gioHang.Rows)
-                tongTien += Convert.ToDecimal(row["ThanhTien"]);
+                tongGoc += Convert.ToDecimal(row["ThanhTien"]);
+
+            decimal tongThanhToan = tongGoc - _tienGiam;
+            if (tongThanhToan < 0) tongThanhToan = 0;
 
             try
             {
-                bool kq = banHangBus.ThanhToan(maNhanVien, maKhachHang, _gioHang, tongTien);
+                // Lưu ý: phiên bản hiện tại BanHang_BUS.ThanhToan chưa nhận tham số khuyến mãi
+                // nên ta lưu tongThanhToan (đã trừ KM) vào TongTien của HĐ.
+                // Nếu muốn lưu riêng KhuyenMaiID và TienGiam vào HoaDons, sửa thêm DAO/BUS.
+                int maHoaDon = banHangBus.ThanhToan(maNhanVien, maKhachHang, _gioHang, tongThanhToan);
 
-                if (kq)
+                if (maHoaDon > 0)
                 {
-                    MessageBox.Show("Đã chốt đơn thành công! Tồn kho đã được trừ.");
+                    string thongBao = $"Đã chốt đơn thành công! Mã hóa đơn: {maHoaDon}";
+                    if (_tienGiam > 0)
+                        thongBao += $"\nKhuyến mãi đã giảm: {_tienGiam:N0} VNĐ";
+                    thongBao += "\n\nBạn có muốn in hóa đơn không?";
+
+                    DialogResult kq = MessageBox.Show(thongBao,
+                        "Thanh toán thành công",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (kq == DialogResult.Yes)
+                    {
+                        frmInHoaDon frm = new frmInHoaDon(maHoaDon);
+                        frm.ShowDialog();
+                    }
+
+                    // Reset
                     _gioHang.Rows.Clear();
                     _maSPChon = -1;
                     nudSoLuong.Value = 1;
-                    txtTongCong.Text = "0 VNĐ";
+                    HuyKhuyenMai();
+                    CapNhatTongCong();
                     LoadDanhSachSanPham();
                 }
                 else
@@ -205,7 +303,41 @@ namespace QuanLyBanHang.GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi nghiêm trọng khi thanh toán:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi nghiêm trọng khi thanh toán:\n" + ex.Message,
+                    "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnApDungKM_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnHuyKM_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblKMApDung_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtMaKM_Enter(object sender, EventArgs e)
+        {
+            if (txtMaKM.Text == "Nhập mã KM...")
+            {
+                txtMaKM.Text = ""; // Xóa chữ gợi ý đi
+                txtMaKM.ForeColor = Color.Black; // Đổi màu chữ sang đen để người dùng nhập
+            }
+        }
+
+        private void txtMaKM_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtMaKM.Text))
+            {
+                txtMaKM.Text = "Nhập mã KM..."; // Nếu để trống thì hiện lại chữ gợi ý
+                txtMaKM.ForeColor = Color.Gray; // Đổi lại màu xám
             }
         }
     }

@@ -1,48 +1,99 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuanLyBanHang.DAO
 {
+    /// <summary>
+    /// Lớp tiện ích kết nối CSDL.
+    /// Đọc connection string từ App.config nếu có, không thì dùng chuỗi mặc định.
+    /// </summary>
     public class DataProvider
     {
-        public static SqlConnection MoKetNoi()
-        {
-            string s = @"Data Source=.\SQLEXPRESS01;Initial Catalog=QLBHang;Integrated Security=True;TrustServerCertificate=True";
-            SqlConnection KetNoi = new SqlConnection(s);
-            KetNoi.Open();
-            return KetNoi;
-        }
+        // Chuỗi kết nối mặc định, phòng khi chưa cấu hình App.config
+        private const string CONNECTION_STRING_MAC_DINH =
+            @"Data Source=.\SQLEXPRESS01;Initial Catalog=QLBHang;Integrated Security=True;TrustServerCertificate=True";
 
-        public static void DongKetNoi(SqlConnection KetNoi)
-        {
-            KetNoi.Close();
-        }
-
-        public static DataTable TruyVanLayDuLieu(string sTruyVan, SqlConnection KetNoi)
-        {
-            SqlDataAdapter da=new SqlDataAdapter(sTruyVan, KetNoi);
-            DataTable dt=new DataTable();
-            da.Fill(dt);
-            return dt;
-        }
-
-        public static bool TruyVanKhongLayDuLieu(string sTruyVan, SqlConnection KetNoi)
+        /// <summary>
+        /// Lấy chuỗi kết nối từ App.config (key = "QLBHang"), không có thì trả về mặc định.
+        /// </summary>
+        public static string LayChuoiKetNoi()
         {
             try
             {
-                SqlCommand command = new SqlCommand(sTruyVan, KetNoi);
-                command.ExecuteNonQuery();
-                return true;
+                var cfg = ConfigurationManager.ConnectionStrings["QLBHang"];
+                if (cfg != null && !string.IsNullOrEmpty(cfg.ConnectionString))
+                    return cfg.ConnectionString;
             }
-            catch (Exception)
+            catch { /* nếu đọc config lỗi thì dùng mặc định */ }
+
+            return CONNECTION_STRING_MAC_DINH;
+        }
+
+        /// <summary>
+        /// Mở kết nối mới. Khuyến nghị đặt trong khối using để đảm bảo đóng đúng cách.
+        /// </summary>
+        public static SqlConnection MoKetNoi()
+        {
+            SqlConnection conn = new SqlConnection(LayChuoiKetNoi());
+            conn.Open();
+            return conn;
+        }
+
+        /// <summary>
+        /// Đóng kết nối (giữ lại cho tương thích với code cũ).
+        /// </summary>
+        public static void DongKetNoi(SqlConnection conn)
+        {
+            if (conn != null && conn.State != ConnectionState.Closed)
+                conn.Close();
+        }
+
+        /// <summary>
+        /// Chạy câu SELECT trả về DataTable. Dùng using nên luôn đóng connection.
+        /// </summary>
+        public static DataTable TruyVanLayDuLieu(string sTruyVan, SqlConnection conn)
+        {
+            using (SqlDataAdapter da = new SqlDataAdapter(sTruyVan, conn))
             {
-                return false;
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        /// <summary>
+        /// Chạy SELECT có tham số (an toàn, dùng thay cho TruyVanLayDuLieu khi có biến).
+        /// </summary>
+        public static DataTable TruyVanLayDuLieu(string sTruyVan, SqlConnection conn, params SqlParameter[] thamSo)
+        {
+            using (SqlCommand cmd = new SqlCommand(sTruyVan, conn))
+            {
+                if (thamSo != null && thamSo.Length > 0)
+                    cmd.Parameters.AddRange(thamSo);
+
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                {
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Chạy INSERT/UPDATE/DELETE. Trả về số dòng bị ảnh hưởng.
+        /// Không nuốt exception để debug dễ hơn.
+        /// </summary>
+        public static int TruyVanKhongLayDuLieu(string sTruyVan, SqlConnection conn, params SqlParameter[] thamSo)
+        {
+            using (SqlCommand cmd = new SqlCommand(sTruyVan, conn))
+            {
+                if (thamSo != null && thamSo.Length > 0)
+                    cmd.Parameters.AddRange(thamSo);
+
+                return cmd.ExecuteNonQuery();
             }
         }
     }

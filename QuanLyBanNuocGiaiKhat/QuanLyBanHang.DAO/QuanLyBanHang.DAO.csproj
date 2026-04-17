@@ -163,14 +163,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BanHang_DAO.cs" />
+    <Compile Include="BaoCao_DAO.cs" />
     <Compile Include="DataProvider.cs" />
+    <Compile Include="HangSanXuat_DAO.cs" />
+    <Compile Include="HanSuDung_DAO.cs" />
     <Compile Include="HoaDon_DAO.cs" />
     <Compile Include="KhachHang_DAO.cs" />
+    <Compile Include="KhuyenMai_DAO.cs" />
+    <Compile Include="LichSuHoaDon_DAO.cs" />
+    <Compile Include="LichSuPhieuNhap_DAO.cs" />
+    <Compile Include="LoaiSanPham_DAO.cs" />
+    <Compile Include="NhaCungCap_DAO.cs" />
     <Compile Include="NhanVien_DAO.cs" />
     <Compile Include="NhapHang_DAO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SanPham_DAO.cs" />
     <Compile Include="TonKho_DAO.cs" />
+    <Compile Include="TraHang_DAO.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuanLyBanHang.DTO\QuanLyBanHang.DTO.csproj">

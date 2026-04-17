@@ -163,12 +163,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BanHang_BUS.cs" />
+    <Compile Include="BaoCao_BUS.cs" />
+    <Compile Include="HangSanXuat_BUS.cs" />
+    <Compile Include="HanSuDung_BUS.cs" />
     <Compile Include="KhachHang_BUS.cs" />
+    <Compile Include="KhuyenMai_BUS.cs" />
+    <Compile Include="LichSuHoaDon_BUS.cs" />
+    <Compile Include="LichSuPhieuNhap_BUS.cs" />
+    <Compile Include="LoaiSanPham_BUS.cs" />
+    <Compile Include="NhaCungCap_BUS.cs" />
     <Compile Include="NhanVien_BUS.cs" />
     <Compile Include="NhapHang_BUS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HoaDon_BUS.cs" />
+    <Compile Include="SanPham_BUS.cs" />
     <Compile Include="TonKho_BUS.cs" />
+    <Compile Include="TraHang_BUS.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

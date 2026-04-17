@@ -1,11 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace QuanLyBanHang.GUI
@@ -15,117 +8,180 @@ namespace QuanLyBanHang.GUI
         public frmMain()
         {
             InitializeComponent();
-            this.Load += frmMain_Load;
         }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
             ApDungPhanQuyen();
-            lblXinChao.Text = "Xin chào: " + UserSession.HoTen;
-            lblXinChao.Text = $"Xin chào: {UserSession.HoTen} | Giờ vào: {UserSession.ThoiGianVao.ToString("HH:mm - dd/MM/yyyy")}";
+            CheckCanhBaoHSD();  // Cảnh báo HSD khi khởi động
         }
 
-        /// <summary>
-        /// Phân quyền menu dựa trên vai trò người dùng đang đăng nhập.
-        /// Admin: toàn bộ menu.
-        /// Nhân viên: chỉ Bán hàng + Hệ thống (Đổi mật khẩu, Đăng xuất, Thoát).
-        /// </summary>
-        private void ApDungPhanQuyen()
+        private void OpenForm(Form f)
         {
-            bool isAdmin = UserSession.IsAdmin;
-
-            // Hiển thị tên người dùng ở thanh trạng thái
-            lblXinChao.Text = $"Xin chào: {UserSession.HoTen}  |  Vai trò: {(isAdmin ? "Quản trị viên" : "Nhân viên")}";
-
-            // ===== ADMIN: thấy tất cả =====
-            // ===== NHÂN VIÊN: ẩn các menu sau =====
-            danhMụcToolStripMenuItem.Visible = isAdmin; // Nhân viên, Khách hàng, Sản phẩm
-            nhậpHàngToolStripMenuItem.Visible = isAdmin; // Nhập hàng
-            báoCáoToolStripMenuItem.Visible = isAdmin; // Doanh thu, Tồn kho
-
-            // Nhân viên chỉ còn: Bán hàng (nghiệpVụ vẫn Visible nhưng ẩn Nhập hàng)
-            // Nếu ẩn hết sub-item thì ẩn luôn menu cha
-            bool conSubItemNghiepVu = bánHàngToolStripMenuItem.Visible || nhậpHàngToolStripMenuItem.Visible;
-            nghiệpVụToolStripMenuItem.Visible = true; // Luôn hiện vì có Bán hàng
-        }
-
-        private void nhânViênToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // 1. Kiểm tra xem form Nhân viên đã được mở sẵn chưa
             foreach (Form form in this.MdiChildren)
             {
-                if (form.Name == "frmNhanVien")
+                if (form.GetType() == f.GetType())
                 {
-                    form.Activate(); // Nếu mở rồi thì chỉ cần đưa nó lên trên cùng
+                    form.Activate();
                     return;
                 }
             }
-
-            // 2. Nếu chưa mở thì tạo mới và cho hiển thị bên trong form Main
-            frmNhanVien fNV = new frmNhanVien();
-            fNV.MdiParent = this; // Khai báo form Main là form Mẹ
-            fNV.Show();
+            f.MdiParent = this;
+            f.Show();
         }
 
-        private void hệThốngToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ApDungPhanQuyen()
         {
+            bool isAdmin = UserSession.IsAdmin;
+            string vaiTro = isAdmin ? "Quản trị viên" : "Nhân viên";
+            string gioVao = UserSession.ThoiGianVao.ToString("HH:mm - dd/MM/yyyy");
 
+            lblXinChao.Text = $"Xin chào: {UserSession.HoTen}  |  Vai trò: {vaiTro}  |  Giờ vào: {gioVao}";
+
+            if (!isAdmin)
+            {
+                danhMụcToolStripMenuItem.Visible = false;
+                báoCáoToolStripMenuItem.Visible = false;
+
+                nhânViênToolStripMenuItem.Visible = false;
+                kháchHàngToolStripMenuItem.Visible = false;
+                sảnPhẩmToolStripMenuItem.Visible = false;
+                nhậpHàngToolStripMenuItem.Visible = false;
+                doanhThuToolStripMenuItem.Visible = false;
+                hàngTồnKhoToolStripMenuItem.Visible = false;
+
+                hệThốngToolStripMenuItem.Visible = true;
+            }
+        }
+
+        /// <summary>
+        /// Kiểm tra cảnh báo HSD, chỉ hiện cho admin khi có lô sắp/đã hết hạn.
+        /// </summary>
+        private void CheckCanhBaoHSD()
+        {
+            if (!UserSession.IsAdmin) return;
+
+            try
+            {
+                BUS.HanSuDung_BUS hsdBus = new BUS.HanSuDung_BUS();
+                hsdBus.DemCanhBao(30, out int soLoSapHet, out int soLoDaHet);
+
+                if (soLoDaHet > 0 || soLoSapHet > 0)
+                {
+                    string msg = "";
+                    if (soLoDaHet > 0)
+                        msg += $"⚠ Có {soLoDaHet} lô hàng ĐÃ HẾT HẠN sử dụng.\n";
+                    if (soLoSapHet > 0)
+                        msg += $"⚠ Có {soLoSapHet} lô hàng SẮP HẾT HẠN (trong 30 ngày).\n";
+                    msg += "\nBạn có muốn xem chi tiết không?";
+
+                    if (MessageBox.Show(msg, "Cảnh báo HSD",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    {
+                        OpenForm(new frmCanhBaoHSD());
+                    }
+                }
+            }
+            catch
+            {
+                // Nếu DB chưa có cột HanSuDung (chưa chạy patch Đợt 3), im lặng bỏ qua
+            }
+        }
+
+        // ===================== DANH MỤC =====================
+
+        private void nhânViênToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenForm(new frmNhanVien());
         }
 
         private void kháchHàngToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // 1. Khởi tạo Form Khách Hàng (Lưu ý: Thay frmKhachHang bằng đúng tên Form của bạn)
-            frmKhachHang f = new frmKhachHang();
-            f.ShowDialog();
+            OpenForm(new frmKhachHang());
+        }
+
+        private void khuyếnMãiToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmKhuyenMai());
+        }
+        private void nhàCungCấpToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmNhaCungCap());
+        }
+      
+        private void khuyếnMãiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenForm(new frmKhuyenMai());
+        }
+
+        private void loạiSảnPhẩmToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmLoaiSanPham());
+        }
+
+        private void hãngSảnXuấtToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmSanPham());
         }
 
         private void sảnPhẩmToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmSanPham f = new frmSanPham();
-            f.ShowDialog();
+            OpenForm(new frmSanPham());
         }
+        // ===================== NGHIỆP VỤ =====================
 
         private void bánHàngToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmBanHang f = new frmBanHang();
-            f.ShowDialog();
+            OpenForm(new frmBanHang());
         }
 
         private void nhậpHàngToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmNhapHang f = new frmNhapHang();
-            f.ShowDialog();
+            OpenForm(new frmNhapHang());
         }
+
+        // MỚI: Trả hàng
+        private void trảHàngToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmTraHang());
+        }
+        // ===================== BÁO CÁO =====================
 
         private void hàngTồnKhoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmThongKeTonKho f = new frmThongKeTonKho();
-            f.ShowDialog();
+            OpenForm(new frmThongKeTonKho());
         }
 
-        private void đăngXuấtToolStripMenuItem_Click(object sender, EventArgs e)
+        private void doanhThuToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Hiện hộp thoại hỏi xác nhận đăng xuất
-            DialogResult kq = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-
-            // Nếu chọn Yes thì khởi động lại app để văng ra màn hình Đăng Nhập
-            if (kq == DialogResult.Yes)
-            {
-                Application.Restart();
-            }
+            OpenForm(new frmThongKeDoanhThu());
         }
 
-        private void thoátToolStripMenuItem_Click(object sender, EventArgs e)
+        private void lịchSửHóaĐơnToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            // Hiện hộp thoại hỏi người dùng có chắc chắn muốn thoát không
-            DialogResult kq = MessageBox.Show("Bạn có thực sự muốn thoát chương trình?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            // Nếu người dùng bấm Yes thì mới thoát
-            if (kq == DialogResult.Yes)
-            {
-                Application.Exit();
-            }
+            OpenForm(new frmLichSuHoaDon());
         }
+
+        private void lịchSửPhiếuNhậpToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmLichSuPhieuNhap());
+        }
+        private void cảnhBáoHSDToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmCanhBaoHSD());
+        }
+
+        private void topBánChạyToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmTopBanChay());
+        }
+
+        private void báoCáoLãilỗToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            OpenForm(new frmBaoCaoLaiLo());
+        }
+
+        // ===================== HỆ THỐNG =====================
 
         private void đổiMặtKhẩuToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -133,10 +189,26 @@ namespace QuanLyBanHang.GUI
             f.ShowDialog();
         }
 
-        private void doanhThuToolStripMenuItem_Click(object sender, EventArgs e)
+        private void đăngXuấtToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmThongKeDoanhThu f = new frmThongKeDoanhThu();
-            f.ShowDialog();
+            DialogResult kq = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này?",
+                "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (kq == DialogResult.Yes)
+            {
+                UserSession.DangXuat();
+                Application.Restart();
+            }
+        }
+
+        private void thoátToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult kq = MessageBox.Show("Bạn có thực sự muốn thoát chương trình?",
+                "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (kq == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
     }
 }

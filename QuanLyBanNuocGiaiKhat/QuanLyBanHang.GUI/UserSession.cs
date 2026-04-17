@@ -3,33 +3,35 @@ using System;
 namespace QuanLyBanHang.GUI
 {
     /// <summary>
-    /// Lưu thông tin nhân viên đang đăng nhập vào biến static toàn cục.
-    /// Dùng ở bất kỳ form nào bằng cách gọi UserSession.HoTen, UserSession.IsAdmin, v.v.
+    /// Lưu thông tin phiên đăng nhập hiện tại (biến toàn cục cho toàn app).
     /// </summary>
     public static class UserSession
     {
-        public static int    ID          { get; set; }
-        public static string HoTen       { get; set; }
+        public static int ID { get; set; }
+        public static string HoTen { get; set; }
         public static string TenDangNhap { get; set; }
-        public static bool   IsAdmin     { get; set; } // true = Admin, false = Nhân viên
-
-        // THÊM DÒNG NÀY VÀO:
+        public static bool IsAdmin { get; set; }
         public static DateTime ThoiGianVao { get; set; }
 
+        /// <summary>
+        /// Gán thông tin sau khi đăng nhập thành công. Tự set ThoiGianVao để không phải gán riêng.
+        /// </summary>
         public static void DangNhap(int id, string hoTen, string tenDangNhap, bool isAdmin)
         {
-            ID          = id;
-            HoTen       = hoTen;
+            ID = id;
+            HoTen = hoTen;
             TenDangNhap = tenDangNhap;
-            IsAdmin     = isAdmin;
+            IsAdmin = isAdmin;
+            ThoiGianVao = DateTime.Now;
         }
 
         public static void DangXuat()
         {
-            ID          = 0;
-            HoTen       = string.Empty;
+            ID = 0;
+            HoTen = string.Empty;
             TenDangNhap = string.Empty;
-            IsAdmin     = false;
+            IsAdmin = false;
+            ThoiGianVao = DateTime.MinValue;
         }
     }
 }

@@ -162,9 +162,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HangSanXuat_DTO.cs" />
+    <Compile Include="HoaDon_ChiTiet_DTO.cs" />
+    <Compile Include="HoaDon_DTO.cs" />
     <Compile Include="KhachHang_DTO.cs" />
+    <Compile Include="KhuyenMai_DTO.cs" />
+    <Compile Include="LoaiSanPham_DTO.cs" />
+    <Compile Include="NhaCungCap_DTO.cs" />
     <Compile Include="NhanVien_DTO.cs" />
+    <Compile Include="PhieuNhap_ChiTiet_DTO.cs" />
+    <Compile Include="PhieuNhap_DTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SanPham_DTO.cs" />
+    <Compile Include="TraHang_DTO.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

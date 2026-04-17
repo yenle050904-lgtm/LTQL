@@ -30,7 +30,7 @@ CREATE TABLE NhanViens (
     HoVaTen NVARCHAR(100) NOT NULL,
     DienThoai VARCHAR(20),
     TenDangNhap VARCHAR(50) NOT NULL UNIQUE,
-    MatKhau VARCHAR(255) NOT NULL, -- Để độ dài lớn để lưu mã băm BCrypt
+    MatKhau VARCHAR(255) NOT NULL, -- Mật khẩu đăng nhập
     QuyenHan BIT NOT NULL DEFAULT 0 -- 1: Admin, 0: Nhân viên
 );
 GO
@@ -151,11 +151,10 @@ INSERT INTO HangSanXuats (TenHang, QuocGia) VALUES
 (N'Red Bull', N'Thái Lan');
 
 -- Thêm Nhân Viên TRƯỚC (vì PhieuNhaps cần NhanVienID)
--- (Mật khẩu cho cả 2 tài khoản đều là: 123456 - đã mã hóa BCrypt)
+-- (Mật khẩu cho cả 2 tài khoản đều là: 123456)
 INSERT INTO NhanViens (HoVaTen, DienThoai, TenDangNhap, MatKhau, QuyenHan) VALUES 
-(N'Quản Trị Viên', '0987654321', 'admin', '$2a$10$.5Elh8fgxypNUWhpUUr/xOa2sZm0VIaE0qWuGGl9otUfobb46T1Pq', 1),
-(N'Nhân Viên Bán Hàng', '0912345678', 'nhanvien1', '$2a$10$.5Elh8fgxypNUWhpUUr/xOa2sZm0VIaE0qWuGGl9otUfobb46T1Pq', 0);
-UPDATE NhanViens SET MatKhau = '123456' WHERE TenDangNhap IN ('admin', 'nhanvien1');
+(N'Quản Trị Viên', '0987654321', 'admin',     '123456', 1),
+(N'Nhân Viên Bán Hàng', '0912345678', 'nhanvien1', '123456', 0);
 
 
 -- Thêm Sản Phẩm (Giả sử LoaiSanPhamID và HangSanXuatID chạy từ 1)
@@ -200,3 +199,112 @@ INSERT INTO HoaDon_ChiTiets (HoaDonID, SanPhamID, SoLuong, DonGia, ThanhTien) VA
 (2, 5, 10, 15000, 150000);
 
 SELECT * FROM NhaCungCaps;
+
+-- =============================================================
+-- PATCH SQL ĐỢT 3 - MỞ RỘNG CHO BÁN NƯỚC GIẢI KHÁT
+-- Chạy sau khi DB đã có Đợt 1 và dữ liệu Đợt 2.
+-- =============================================================
+
+USE QLBHang;
+GO
+
+-- =============================================================
+-- 1. HẠN SỬ DỤNG CHO CHI TIẾT PHIẾU NHẬP
+-- =============================================================
+-- Mỗi lần nhập hàng có thể có HSD khác nhau nên đặt ở chi tiết phiếu nhập,
+-- không đặt ở bảng SanPhams.
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'HanSuDung' AND Object_ID = Object_ID(N'PhieuNhap_ChiTiets'))
+BEGIN
+    ALTER TABLE PhieuNhap_ChiTiets ADD HanSuDung DATE NULL;
+END
+GO
+
+
+-- =============================================================
+-- 2. BẢNG KHUYẾN MÃI
+-- =============================================================
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = N'KhuyenMais')
+BEGIN
+    CREATE TABLE KhuyenMais (
+        ID INT IDENTITY(1,1) PRIMARY KEY,
+        MaCode NVARCHAR(50) NOT NULL UNIQUE,      -- Mã code khách nhập vào (vd: SALE10, TET2026)
+        TenKhuyenMai NVARCHAR(200) NOT NULL,
+        PhanTramGiam DECIMAL(5,2) NOT NULL DEFAULT 0,  -- % giảm giá, 0-100
+        GiamToiDa DECIMAL(18,2) NULL,              -- Giới hạn số tiền giảm tối đa
+        DonToiThieu DECIMAL(18,2) NOT NULL DEFAULT 0,  -- Đơn hàng phải >= bao nhiêu mới áp dụng được
+        NgayBatDau DATE NOT NULL,
+        NgayKetThuc DATE NOT NULL,
+        TrangThai BIT NOT NULL DEFAULT 1,         -- 1: Hoạt động, 0: Tạm dừng
+        MoTa NVARCHAR(500) NULL
+    );
+END
+GO
+
+-- Thêm cột KhuyenMaiID và TienGiam vào HoaDons (để ghi nhớ HD nào dùng KM nào)
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'KhuyenMaiID' AND Object_ID = Object_ID(N'HoaDons'))
+BEGIN
+    ALTER TABLE HoaDons ADD KhuyenMaiID INT NULL;
+    ALTER TABLE HoaDons ADD TienGiam DECIMAL(18,2) NOT NULL DEFAULT 0;
+    ALTER TABLE HoaDons ADD CONSTRAINT FK_HoaDons_KhuyenMais FOREIGN KEY (KhuyenMaiID) REFERENCES KhuyenMais(ID);
+END
+GO
+
+
+-- =============================================================
+-- 3. BẢNG TRẢ HÀNG
+-- =============================================================
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = N'PhieuTraHangs')
+BEGIN
+    CREATE TABLE PhieuTraHangs (
+        ID INT IDENTITY(1,1) PRIMARY KEY,
+        NgayTra DATETIME NOT NULL DEFAULT GETDATE(),
+        HoaDonID INT NOT NULL,                    -- Trả hàng của hóa đơn nào
+        NhanVienID INT NOT NULL,                  -- Nhân viên tiếp nhận
+        LyDo NVARCHAR(500) NULL,
+        TongTienHoan DECIMAL(18,2) NOT NULL DEFAULT 0,
+        FOREIGN KEY (HoaDonID) REFERENCES HoaDons(ID),
+        FOREIGN KEY (NhanVienID) REFERENCES NhanViens(ID)
+    );
+
+    CREATE TABLE PhieuTraHang_ChiTiets (
+        ID INT IDENTITY(1,1) PRIMARY KEY,
+        PhieuTraHangID INT NOT NULL,
+        SanPhamID INT NOT NULL,
+        SoLuongTra INT NOT NULL,
+        DonGia DECIMAL(18,2) NOT NULL,
+        ThanhTien DECIMAL(18,2) NOT NULL,
+        FOREIGN KEY (PhieuTraHangID) REFERENCES PhieuTraHangs(ID) ON DELETE CASCADE,
+        FOREIGN KEY (SanPhamID) REFERENCES SanPhams(ID)
+    );
+END
+GO
+
+
+-- =============================================================
+-- 4. DỮ LIỆU MẪU
+-- =============================================================
+
+-- Khuyến mãi mẫu
+IF NOT EXISTS (SELECT 1 FROM KhuyenMais WHERE MaCode = 'SALE10')
+BEGIN
+    INSERT INTO KhuyenMais (MaCode, TenKhuyenMai, PhanTramGiam, GiamToiDa, DonToiThieu, NgayBatDau, NgayKetThuc, TrangThai, MoTa)
+    VALUES 
+    (N'SALE10',  N'Giảm 10% toàn đơn',          10, 50000,  100000, '2026-01-01', '2026-12-31', 1, N'Áp dụng cho đơn từ 100k'),
+    (N'TET2026', N'Khuyến mãi Tết 2026',        15, 100000, 200000, '2026-01-01', '2026-02-28', 1, N'Ưu đãi dịp Tết'),
+    (N'SALE20',  N'Giảm 20% đơn từ 500k',       20, 150000, 500000, '2026-01-01', '2026-12-31', 1, N'Đơn lớn ưu đãi nhiều');
+END
+GO
+
+
+-- =============================================================
+-- 5. CHỈ MỤC HỖ TRỢ QUERY THỐNG KÊ
+-- =============================================================
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_HoaDonChiTiets_SanPhamID')
+    CREATE INDEX IX_HoaDonChiTiets_SanPhamID ON HoaDon_ChiTiets(SanPhamID);
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_HoaDons_NgayLap')
+    CREATE INDEX IX_HoaDons_NgayLap ON HoaDons(NgayLap);
+GO
+
+
+PRINT N'Đã áp dụng patch Đợt 3 thành công!';

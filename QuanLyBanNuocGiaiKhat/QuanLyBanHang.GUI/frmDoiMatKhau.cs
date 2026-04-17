@@ -1,13 +1,6 @@
-﻿using QuanLyBanHang.BUS;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Forms;
+using QuanLyBanHang.BUS;
 
 namespace QuanLyBanHang.GUI
 {
@@ -20,12 +13,17 @@ namespace QuanLyBanHang.GUI
 
         private void frmDoiMatKhau_Load(object sender, EventArgs e)
         {
-            // Giấu mật khẩu bằng dấu chấm mặc định của hệ thống
+            // Giấu mật khẩu
             txtMatKhauCu.UseSystemPasswordChar = true;
             txtMatKhauMoi.UseSystemPasswordChar = true;
             txtNhapLai.UseSystemPasswordChar = true;
 
+            // Tự động điền tên đăng nhập đang login, không cho sửa
+            txtTaiKhoan.Text = UserSession.TenDangNhap ?? string.Empty;
+            txtTaiKhoan.ReadOnly = true;
+            txtTaiKhoan.TabStop = false;
 
+            txtMatKhauCu.Focus();
         }
 
         private void chkHienMatKhauCu_CheckedChanged(object sender, EventArgs e)
@@ -49,14 +47,19 @@ namespace QuanLyBanHang.GUI
             string mkMoi = txtMatKhauMoi.Text.Trim();
             string nhapLai = txtNhapLai.Text.Trim();
 
-            // 1. Kiểm tra không được để trống
             if (string.IsNullOrEmpty(mkCu) || string.IsNullOrEmpty(mkMoi) || string.IsNullOrEmpty(nhapLai))
             {
                 MessageBox.Show("Vui lòng nhập đầy đủ thông tin mật khẩu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. Kiểm tra mật khẩu mới và nhập lại có khớp nhau không
+            if (mkMoi.Length < 4)
+            {
+                MessageBox.Show("Mật khẩu mới phải có ít nhất 4 ký tự!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtMatKhauMoi.Focus();
+                return;
+            }
+
             if (mkMoi != nhapLai)
             {
                 MessageBox.Show("Mật khẩu mới và Nhập lại không khớp nhau. Vui lòng kiểm tra lại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -64,24 +67,35 @@ namespace QuanLyBanHang.GUI
                 return;
             }
 
-            // 3. Xử lý đổi mật khẩu qua lớp BUS (Bạn điều chỉnh lại tên hàm cho đúng với code BUS của bạn nhé)
-            // 3. Xử lý đổi mật khẩu qua lớp BUS
-            NhanVien_BUS nvBUS = new NhanVien_BUS(); // Phải khởi tạo đối tượng BUS trước
-
-            // Gọi hàm qua biến nvBUS
-            bool ketQua = nvBUS.DoiMatKhau(txtTaiKhoan.Text, mkCu, mkMoi);
-
-            if (ketQua == true)
+            if (mkCu == mkMoi)
             {
-                MessageBox.Show("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Close(); // Hoặc Application.Restart() để bắt đăng nhập lại
-            }
-            else
-            {
-                MessageBox.Show("Mật khẩu cũ không chính xác!", "Thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txtMatKhauCu.Focus();
+                MessageBox.Show("Mật khẩu mới phải khác mật khẩu cũ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtMatKhauMoi.Focus();
+                return;
             }
 
+            try
+            {
+                NhanVien_BUS nvBUS = new NhanVien_BUS();
+                bool ketQua = nvBUS.DoiMatKhau(UserSession.TenDangNhap, mkCu, mkMoi);
+
+                if (ketQua)
+                {
+                    MessageBox.Show("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Close();
+                    Application.Restart();
+                }
+                else
+                {
+                    MessageBox.Show("Mật khẩu cũ không chính xác!", "Thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txtMatKhauCu.Focus();
+                    txtMatKhauCu.SelectAll();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi đổi mật khẩu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnHuyBo_Click(object sender, EventArgs e)

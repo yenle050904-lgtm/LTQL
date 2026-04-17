@@ -15,33 +15,45 @@ namespace QuanLyBanHang.BUS
 
         public bool ThemNhanVien(NhanVien_DTO nv)
         {
+            // Nghiệp vụ: kiểm tra trùng tên đăng nhập trước khi thêm
+            if (nvDAO.KiemTraTonTaiTenDangNhap(nv.TenDangNhap))
+                return false;
+
             return nvDAO.Them(nv);
         }
 
         public bool SuaNhanVien(NhanVien_DTO nv)
         {
+            // Khi sửa, bỏ qua chính bản ghi đang sửa
+            if (nvDAO.KiemTraTonTaiTenDangNhap(nv.TenDangNhap, nv.ID))
+                return false;
+
             return nvDAO.Sua(nv);
         }
 
-        public void XoaNhanVien(int id)
+        public bool XoaNhanVien(int id)
         {
-            nvDAO.Xoa(id);
+            return nvDAO.Xoa(id);
         }
 
         public DataTable TimKiemNhanVien(string tuKhoa)
         {
             return nvDAO.TimKiem(tuKhoa);
         }
-        // Hàm xử lý đăng nhập
+
         public DataTable KiemTraDangNhap(string tenDangNhap, string matKhau)
         {
             return nvDAO.KiemTraDangNhap(tenDangNhap, matKhau);
         }
-        // Hàm xử lý đổi mật khẩu
+
         public bool DoiMatKhau(string tenDangNhap, string matKhauCu, string matKhauMoi)
         {
-            // Gọi lệnh đổi mật khẩu từ tầng DAO
             return nvDAO.DoiMatKhau(tenDangNhap, matKhauCu, matKhauMoi);
+        }
+
+        public bool KiemTraTonTaiTenDangNhap(string tenDangNhap, int idBoQua = 0)
+        {
+            return nvDAO.KiemTraTonTaiTenDangNhap(tenDangNhap, idBoQua);
         }
     }
 }
